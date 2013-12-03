@@ -1,5 +1,8 @@
 package com.mwinkelmann.logging.appender;
 
+import java.io.PrintWriter;
+import java.io.StringWriter;
+import java.io.Writer;
 import java.util.Map;
 
 import org.apache.http.HttpResponse;
@@ -34,6 +37,7 @@ public abstract class AbstractHttpAppender extends AppenderBase<ILoggingEvent> {
   private static final int DEFAULT_SUCCESS_CODE_MIN = 200;
 
   // configure params
+  protected String requestUrl = null;
   private boolean errorNotify = true;
   private boolean warnNotify = true;
   private boolean infoNotify = true;
@@ -41,10 +45,11 @@ public abstract class AbstractHttpAppender extends AppenderBase<ILoggingEvent> {
   private boolean traceNotify = true;
   private int successStatusCodeMin = DEFAULT_SUCCESS_CODE_MIN;
   private int successStatusCodeMax = DEFAULT_SUCCESS_CODE_MAX;
-  private String requestUrl = null;
   private Map<String, String> keyToParameterMap = null;
 
-  protected AbstractHttpAppender() {}
+  protected AbstractHttpAppender() {
+    // TODO add Preconditions for mendetory fields
+  }
 
   @Override
   public void start() {
@@ -64,23 +69,23 @@ public abstract class AbstractHttpAppender extends AppenderBase<ILoggingEvent> {
     switch (event.getLevel().levelInt) {
       case Level.ERROR_INT:
         if (errorNotify)
-          this.createAndExecuteRequest();
+          this.createAndExecuteRequest(event);
         break;
       case Level.WARN_INT:
         if (warnNotify)
-          this.createAndExecuteRequest();
+          this.createAndExecuteRequest(event);
         break;
       case Level.INFO_INT:
         if (infoNotify)
-          this.createAndExecuteRequest();
+          this.createAndExecuteRequest(event);
         break;
       case Level.DEBUG_INT:
         if (debugNotify)
-          this.createAndExecuteRequest();
+          this.createAndExecuteRequest(event);
         break;
       case Level.TRACE_INT:
         if (traceNotify)
-          this.createAndExecuteRequest();
+          this.createAndExecuteRequest(event);
         break;
       default:
         logger.error("Unknown logging level: " + event.getLevel().levelStr);
@@ -89,16 +94,16 @@ public abstract class AbstractHttpAppender extends AppenderBase<ILoggingEvent> {
 
   }
 
-  private void createAndExecuteRequest() {
+  private void createAndExecuteRequest(ILoggingEvent event) {
     try {
-      HttpRequestBase createHttpRequest = this.createHttpRequest();
+      HttpRequestBase createHttpRequest = this.createHttpRequest(event);
       this.executeHttpRequest(createHttpRequest);
     } catch (HttpAppenderException e) {
-      logger.error("", e);
+      logger.error("Appender error:", e);
     }
   }
 
-  public abstract HttpRequestBase createHttpRequest();
+  public abstract HttpRequestBase createHttpRequest(ILoggingEvent event) throws HttpAppenderException;
 
   public void executeHttpRequest(HttpRequestBase httpRequest) throws HttpAppenderException
   {
@@ -132,6 +137,13 @@ public abstract class AbstractHttpAppender extends AppenderBase<ILoggingEvent> {
         .setConnectionManager(poolingHttpClientConnectionManager);
 
     return httpClientBuilder.build();
+  }
+
+  private String getStackTraceString(Exception e) {
+    Writer result = new StringWriter();
+    PrintWriter printWriter = new PrintWriter(result);
+    e.printStackTrace(printWriter);
+    return result.toString();
   }
 
   public void setKeyToParameterMap(Map<String, String> keyToParameterMap) {
