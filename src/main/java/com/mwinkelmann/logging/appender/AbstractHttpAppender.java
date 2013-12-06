@@ -24,35 +24,33 @@ import com.mwinkelmann.logging.appender.exception.HttpAppenderException;
 
 /**
  * An abstract base for module specific {@code HttpAppender}
- * implementations in other logback modeules.
+ * implementations in other logback modules.
  * 
  * @author Mike Winkelmann
  *
  */
 public abstract class AbstractHttpAppender extends AppenderBase<ILoggingEvent> implements Runnable {
 
+  private static final int HTTP_CONNECTION_REQUEST_TIMEOUT = 5000;
+  private static final int HTTP_CONNECTION_TIMEOUT = 5000;
+  private static final int HTTP_SOCKET_TIMEOUT = 5000;
   private static final Logger logger = LoggerFactory.getLogger(AbstractHttpAppender.class);
   private CloseableHttpClient httpClient;
   private BlockingQueue<ILoggingEvent> queue;
 
-  // default params
-  private static final int DEFAULT_SUCCESS_CODE_MAX = 299;
-  private static final int DEFAULT_SUCCESS_CODE_MIN = 200;
-  public static final int DEFAULT_QUEUE_SIZE = 0;
-
-  // configure params (required)
+  // configuration params (required)
   protected String requestUrl = null;
 
-  // configure params (optional)
-  private boolean errorNotify = true;
-  private boolean warnNotify = true;
-  private boolean infoNotify = true;
-  private boolean debugNotify = true;
-  private boolean traceNotify = true;
-  private int successStatusCodeMin = DEFAULT_SUCCESS_CODE_MIN;
-  private int successStatusCodeMax = DEFAULT_SUCCESS_CODE_MAX;
+  // configuration params (optional because defaults are set)
+  private boolean errorNotify = AbstractHttpAppenderConfig.DEFAULT_ERROR_NOTIFY;
+  private boolean warnNotify = AbstractHttpAppenderConfig.DEFAULT_WARN_NOTIFY;
+  private boolean infoNotify = AbstractHttpAppenderConfig.DEFAULT_INFO_NOTIFY;
+  private boolean debugNotify = AbstractHttpAppenderConfig.DEFAULT_DEBUG_NOTIFY;
+  private boolean traceNotify = AbstractHttpAppenderConfig.DEFAULT_TRACE_NOTIFY;
+  private int successStatusCodeMin = AbstractHttpAppenderConfig.DEFAULT_SUCCESS_CODE_MIN;
+  private int successStatusCodeMax = AbstractHttpAppenderConfig.DEFAULT_SUCCESS_CODE_MIN;
   private Map<String, String> keyToParameterMap = null;
-  private int queueSize = DEFAULT_QUEUE_SIZE;
+  private int queueSize = AbstractHttpAppenderConfig.DEFAULT_QUEUE_SIZE;
 
   protected AbstractHttpAppender()
   {}
@@ -106,9 +104,9 @@ public abstract class AbstractHttpAppender extends AppenderBase<ILoggingEvent> i
 
   private CloseableHttpClient createHttpClient() {
     RequestConfig defaultRequestConfig = RequestConfig.custom()
-      .setSocketTimeout(5000)
-      .setConnectTimeout(5000)
-      .setConnectionRequestTimeout(5000)
+      .setSocketTimeout(HTTP_SOCKET_TIMEOUT)
+      .setConnectTimeout(HTTP_CONNECTION_TIMEOUT)
+      .setConnectionRequestTimeout(HTTP_CONNECTION_REQUEST_TIMEOUT)
       .build();
 
     return HttpClients.custom()
