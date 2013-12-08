@@ -18,12 +18,9 @@ public class DefaultHttpGetAppender extends AbstractHttpAppender {
 
   @Override
   public HttpRequestBase createHttpRequest(ILoggingEvent event) throws HttpAppenderException {
-    final HttpGet httpRequest = new HttpGet(this.requestUrl);
+    final HttpGet httpRequest = new HttpGet(this.getRequestUrl());
     httpRequest.addHeader(HttpHeaders.CONTENT_TYPE, "application/json");
     httpRequest.addHeader(HttpHeaders.ACCEPT, "application/json");
-    
-    // TODO implement call with param map
-    
     return httpRequest;
   }
 

@@ -38,7 +38,7 @@ public abstract class AbstractHttpAppender extends AppenderBase<ILoggingEvent> i
   private Future<?> task;
 
   // configuration params (required)
-  protected String requestUrl = null;
+  private String requestUrl = null;
 
   // configuration params (optional because defaults are set)
   private boolean error = AbstractHttpAppenderConfig.DEFAULT_ERROR;
