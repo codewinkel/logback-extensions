@@ -1,8 +1,9 @@
-package com.mwinkelmann.logging.appender;
+package com.mwinkelmann.logging.appender.http;
 
 import java.util.Map;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.BlockingQueue;
+import java.util.concurrent.Future;
 import java.util.concurrent.SynchronousQueue;
 
 import org.apache.http.HttpResponse;
@@ -20,7 +21,7 @@ import ch.qos.logback.core.AppenderBase;
 import ch.qos.logback.core.util.CloseUtil;
 
 import com.google.common.base.Preconditions;
-import com.mwinkelmann.logging.appender.exception.HttpAppenderException;
+import com.mwinkelmann.logging.appender.http.exception.HttpAppenderException;
 
 /**
  * An abstract base for module specific {@code HttpAppender}
@@ -31,22 +32,20 @@ import com.mwinkelmann.logging.appender.exception.HttpAppenderException;
  */
 public abstract class AbstractHttpAppender extends AppenderBase<ILoggingEvent> implements Runnable {
 
-  private static final int HTTP_CONNECTION_REQUEST_TIMEOUT = 5000;
-  private static final int HTTP_CONNECTION_TIMEOUT = 5000;
-  private static final int HTTP_SOCKET_TIMEOUT = 5000;
   private static final Logger logger = LoggerFactory.getLogger(AbstractHttpAppender.class);
   private CloseableHttpClient httpClient;
   private BlockingQueue<ILoggingEvent> queue;
+  private Future<?> task;
 
   // configuration params (required)
   protected String requestUrl = null;
 
   // configuration params (optional because defaults are set)
-  private boolean errorNotify = AbstractHttpAppenderConfig.DEFAULT_ERROR_NOTIFY;
-  private boolean warnNotify = AbstractHttpAppenderConfig.DEFAULT_WARN_NOTIFY;
-  private boolean infoNotify = AbstractHttpAppenderConfig.DEFAULT_INFO_NOTIFY;
-  private boolean debugNotify = AbstractHttpAppenderConfig.DEFAULT_DEBUG_NOTIFY;
-  private boolean traceNotify = AbstractHttpAppenderConfig.DEFAULT_TRACE_NOTIFY;
+  private boolean error = AbstractHttpAppenderConfig.DEFAULT_ERROR;
+  private boolean warn = AbstractHttpAppenderConfig.DEFAULT_WARN;
+  private boolean info = AbstractHttpAppenderConfig.DEFAULT_INFO;
+  private boolean debug = AbstractHttpAppenderConfig.DEFAULT_DEBUG;
+  private boolean trace = AbstractHttpAppenderConfig.DEFAULT_TRACE;
   private int successStatusCodeMin = AbstractHttpAppenderConfig.DEFAULT_SUCCESS_CODE_MIN;
   private int successStatusCodeMax = AbstractHttpAppenderConfig.DEFAULT_SUCCESS_CODE_MIN;
   private Map<String, String> keyToParameterMap = null;
@@ -60,9 +59,10 @@ public abstract class AbstractHttpAppender extends AppenderBase<ILoggingEvent> i
     if (this.isStarted())
       return;
     Preconditions.checkNotNull(this.requestUrl, "RequestUrl must not be null");
-    Preconditions.checkArgument(this.queueSize < 0, "Queue size must be non negative");
+    Preconditions.checkArgument(this.queueSize >= 0, "Queue size must be non negative");
     httpClient = createHttpClient();
     queue = createQueue();
+    this.task = this.getContext().getExecutorService().submit(this);
     super.start();
   }
 
@@ -71,7 +71,7 @@ public abstract class AbstractHttpAppender extends AppenderBase<ILoggingEvent> i
     if (!this.isStarted())
       return;
     CloseUtil.closeQuietly(httpClient);
-    httpClient = null;
+    this.task.cancel(true);
     super.stop();
   }
 
@@ -104,9 +104,9 @@ public abstract class AbstractHttpAppender extends AppenderBase<ILoggingEvent> i
 
   private CloseableHttpClient createHttpClient() {
     RequestConfig defaultRequestConfig = RequestConfig.custom()
-      .setSocketTimeout(HTTP_SOCKET_TIMEOUT)
-      .setConnectTimeout(HTTP_CONNECTION_TIMEOUT)
-      .setConnectionRequestTimeout(HTTP_CONNECTION_REQUEST_TIMEOUT)
+      .setSocketTimeout(AbstractHttpAppenderConfig.HTTP_SOCKET_TIMEOUT)
+      .setConnectTimeout(AbstractHttpAppenderConfig.HTTP_CONNECTION_TIMEOUT)
+      .setConnectionRequestTimeout(AbstractHttpAppenderConfig.HTTP_CONNECTION_REQUEST_TIMEOUT)
       .build();
 
     return HttpClients.custom()
@@ -122,23 +122,23 @@ public abstract class AbstractHttpAppender extends AppenderBase<ILoggingEvent> i
         final ILoggingEvent event = this.queue.take();
         switch (event.getLevel().levelInt) {
           case Level.ERROR_INT:
-            if (errorNotify)
+            if (error)
               this.createAndExecuteRequest(event);
             break;
           case Level.WARN_INT:
-            if (warnNotify)
+            if (warn)
               this.createAndExecuteRequest(event);
             break;
           case Level.INFO_INT:
-            if (infoNotify)
+            if (info)
               this.createAndExecuteRequest(event);
             break;
           case Level.DEBUG_INT:
-            if (debugNotify)
+            if (debug)
               this.createAndExecuteRequest(event);
             break;
           case Level.TRACE_INT:
-            if (traceNotify)
+            if (trace)
               this.createAndExecuteRequest(event);
             break;
           default:
@@ -158,7 +158,8 @@ public abstract class AbstractHttpAppender extends AppenderBase<ILoggingEvent> i
   private void createAndExecuteRequest(ILoggingEvent event) {
     try {
       HttpRequestBase createHttpRequest = this.createHttpRequest(event);
-      this.executeHttpRequest(createHttpRequest);
+      if (createHttpRequest != null)
+        this.executeHttpRequest(createHttpRequest);
     } catch (HttpAppenderException e) {
       logger.error("Appender error:", e);
     }
@@ -189,76 +190,84 @@ public abstract class AbstractHttpAppender extends AppenderBase<ILoggingEvent> i
     }
   }
 
-  public void setKeyToParameterMap(Map<String, String> keyToParameterMap) {
-    this.keyToParameterMap = keyToParameterMap;
-  }
-
-  public Map<String, String> getKeyToParameterMap() {
-    return this.keyToParameterMap;
+  public String getRequestUrl() {
+    return this.requestUrl;
   }
 
   public void setRequestUrl(String requestUrl) {
     this.requestUrl = requestUrl;
   }
 
-  public String getRequestUrl() {
-    return this.requestUrl;
+  public boolean isError() {
+    return this.error;
   }
 
-  public void setSuccessStatusCodeMax(int successStatusCodeMax) {
-    this.successStatusCodeMax = successStatusCodeMax;
+  public void setError(boolean error) {
+    this.error = error;
   }
 
-  public int getSuccessStatusCodeMax() {
-    return this.successStatusCodeMax;
+  public boolean isWarn() {
+    return this.warn;
   }
 
-  public void setSuccessStatusCodeMin(int successStatusCodeMin) {
-    this.successStatusCodeMin = successStatusCodeMin;
+  public void setWarn(boolean warn) {
+    this.warn = warn;
+  }
+
+  public boolean isInfo() {
+    return this.info;
+  }
+
+  public void setInfo(boolean info) {
+    this.info = info;
+  }
+
+  public boolean isDebug() {
+    return this.debug;
+  }
+
+  public void setDebug(boolean debug) {
+    this.debug = debug;
+  }
+
+  public boolean isTrace() {
+    return this.trace;
+  }
+
+  public void setTrace(boolean trace) {
+    this.trace = trace;
   }
 
   public int getSuccessStatusCodeMin() {
     return this.successStatusCodeMin;
   }
 
-  public boolean isErrorNotify() {
-    return this.errorNotify;
+  public void setSuccessStatusCodeMin(int successStatusCodeMin) {
+    this.successStatusCodeMin = successStatusCodeMin;
   }
 
-  public void setErrorNotify(boolean errorNotify) {
-    this.errorNotify = errorNotify;
+  public int getSuccessStatusCodeMax() {
+    return this.successStatusCodeMax;
   }
 
-  public boolean isWarnNotify() {
-    return this.warnNotify;
+  public void setSuccessStatusCodeMax(int successStatusCodeMax) {
+    this.successStatusCodeMax = successStatusCodeMax;
   }
 
-  public void setWarnNotify(boolean warnNotify) {
-    this.warnNotify = warnNotify;
+  public Map<String, String> getKeyToParameterMap() {
+    return this.keyToParameterMap;
   }
 
-  public boolean isInfoNotify() {
-    return this.infoNotify;
+  public void setKeyToParameterMap(Map<String, String> keyToParameterMap) {
+    this.keyToParameterMap = keyToParameterMap;
   }
 
-  public void setInfoNotify(boolean infoNotify) {
-    this.infoNotify = infoNotify;
+  public int getQueueSize() {
+    return this.queueSize;
   }
 
-  public boolean isDebugNotify() {
-    return this.debugNotify;
-  }
-
-  public void setDebugNotify(boolean debugNotify) {
-    this.debugNotify = debugNotify;
-  }
-
-  public boolean isTraceNotify() {
-    return this.traceNotify;
-  }
-
-  public void setTraceNotify(boolean traceNotify) {
-    this.traceNotify = traceNotify;
+  public void setQueueSize(int queueSize) {
+    this.queueSize = queueSize;
   }
 
 }

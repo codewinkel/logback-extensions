@@ -1,4 +1,4 @@
-package com.mwinkelmann.logging.appender.exception;
+package com.mwinkelmann.logging.appender.http.exception;
 
 /**
  * Specific http appender exception.
