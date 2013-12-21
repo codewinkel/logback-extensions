@@ -54,13 +54,6 @@
 			<version>15.0</version>
 		</dependency>
 
-		<dependency>
-			<groupId>com.quigley</groupId>
-			<artifactId>zabbixj</artifactId>
-			<version>${zabbixj.version}</version>
-		</dependency>
-
 	</dependencies>
-
 
 </project>
