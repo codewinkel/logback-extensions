@@ -26,7 +26,7 @@ import com.mwinkelmann.logging.appender.http.exception.HttpAppenderException;
  *
  */
 public class HockeyappCrashAppender extends AbstractHttpAppender {
-
+  // @TODO implememt checks for filesize
   private static final String DATE_FORMAT = "yyyy-MM-dd HH:mm:ss";
   private static final String HOCKEYAPP_CRASH_API_URL_APPID_PLACEHOLDER = "{APPID}";
   private static final String HOCKEYAPP_CRASH_API_URL = "https://rink.hockeyapp.net/api/2/apps/"
@@ -34,7 +34,7 @@ public class HockeyappCrashAppender extends AbstractHttpAppender {
 
   // configuration
   private SimpleDateFormat dateFormat = null;
-  private String userId, email, model, manufacturer, os, version, packageName, apiToken, appId, requestUrl;
+  private String userId, contact, model, manufacturer, os, version, packageName, apiToken, appId, requestUrl;
 
   public HockeyappCrashAppender() {
     this.setRequestUrl(HOCKEYAPP_CRASH_API_URL);
@@ -65,8 +65,8 @@ public class HockeyappCrashAppender extends AbstractHttpAppender {
     //  TODO implement .addBinaryBody("attachment", this.createAttatchmentFile(event))
     if (this.userId != null)
       multipartEntityBuilder.addTextBody("userID", this.userId);
-    if (this.email != null)
-      multipartEntityBuilder.addTextBody("contact", this.email);
+    if (this.contact != null)
+      multipartEntityBuilder.addTextBody("contact", this.contact);
 
     HttpEntity multipartEntity = multipartEntityBuilder.build();
 
@@ -108,11 +108,13 @@ public class HockeyappCrashAppender extends AbstractHttpAppender {
   }
 
   public void setUserId(String userId) {
-    this.userId = userId;
+    if (userId != null && userId.length() <= 255)
+      this.userId = userId;
   }
 
-  public void setEmail(String email) {
-    this.email = email;
+  public void setContact(String contact) {
+    if (contact != null && contact.length() <= 255)
+      this.contact = contact;
   }
 
   public void setModel(String model) {
