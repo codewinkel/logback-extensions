@@ -2,11 +2,11 @@
 
 ##About
 
-The `logback-extensions` modul as an add-on for your logback context.
+The `logback-extensions` module is an add-on for your logback context.
 This module does the following things:
 
 * `DefaultHttpGetAppender`: the DefaultHttpGetAppender can send some GET requests to an configured requestUrl.
-* `HockeyAppCrashAppender`: the HockeyAppCrashAppender can send the stack trace of the exception of your program to hockeyapp, so hockey app can visualize your *exception flows* and create tickets in your bug tracker system
+* `HockeyAppCrashAppender`: the HockeyAppCrashAppender can send the stack trace of e.g. an exception of your program to hockeyapp, so hockey app can visualize your *exception flows* and create tickets in your bug tracker system automatically.
 
 ##Maven
 
