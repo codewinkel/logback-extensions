@@ -14,6 +14,7 @@ import org.apache.http.entity.mime.content.FileBody;
 import ch.qos.logback.classic.spi.ILoggingEvent;
 
 import com.google.common.base.Preconditions;
+import com.google.common.base.Strings;
 import com.mwinkelmann.logging.appender.http.AbstractHttpAppender;
 import com.mwinkelmann.logging.appender.http.exception.HttpAppenderException;
 
@@ -26,19 +27,18 @@ import com.mwinkelmann.logging.appender.http.exception.HttpAppenderException;
  */
 public class HockeyappCrashAppender extends AbstractHttpAppender {
 
+  private static final String DATE_FORMAT = "yyyy-MM-dd HH:mm:ss";
   private static final String HOCKEYAPP_CRASH_API_URL_APPID_PLACEHOLDER = "{APPID}";
   private static final String HOCKEYAPP_CRASH_API_URL = "https://rink.hockeyapp.net/api/2/apps/"
     + HOCKEYAPP_CRASH_API_URL_APPID_PLACEHOLDER + "/crashes/upload";
 
-  // TODO configurable
-  private SimpleDateFormat dateFormat = null;
-
   // configuration
+  private SimpleDateFormat dateFormat = null;
   private String userId, email, model, manufacturer, os, version, packageName, apiToken, appId, requestUrl;
 
   public HockeyappCrashAppender() {
     this.setRequestUrl(HOCKEYAPP_CRASH_API_URL);
-    dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+    dateFormat = new SimpleDateFormat(DATE_FORMAT);
   }
 
   @Override
@@ -59,14 +59,16 @@ public class HockeyappCrashAppender extends AbstractHttpAppender {
     File crashFile = this.createCrashLogFile(event);
     FileBody crashFileBody = new FileBody(crashFile);
 
-    HttpEntity multipartEntity = MultipartEntityBuilder.create()
-      .addPart("log", crashFileBody)
-      //  TODO implement .addBinaryBody("description", this.createDescriptionLogFile(event))
-      //  TODO implement .addBinaryBody("attachment", this.createAttatchmentFile(event))
-      .addTextBody("userID", this.userId)
-      .addTextBody("contact", this.email)
-      .setStrictMode()
-      .build();
+    MultipartEntityBuilder multipartEntityBuilder = MultipartEntityBuilder.create()
+      .addPart("log", crashFileBody);
+    //  TODO implement .addBinaryBody("description", this.createDescriptionLogFile(event))
+    //  TODO implement .addBinaryBody("attachment", this.createAttatchmentFile(event))
+    if (this.userId != null)
+      multipartEntityBuilder.addTextBody("userID", this.userId);
+    if (this.email != null)
+      multipartEntityBuilder.addTextBody("contact", this.email);
+
+    HttpEntity multipartEntity = multipartEntityBuilder.build();
 
     httpRequest.setEntity(multipartEntity);
 
@@ -81,10 +83,10 @@ public class HockeyappCrashAppender extends AbstractHttpAppender {
       tmpFile = File.createTempFile("exception", ".exc.log");
 
       content.append("Package: ").append(this.packageName).append("\n");
-      content.append("Version: ").append(this.version).append("\n");
-      content.append("OS: ").append(this.os).append("\n");
-      content.append("Manufacturer: ").append(this.manufacturer).append("\n");
-      content.append("Model: ").append(this.model).append("\n");
+      content.append("Version: ").append(Strings.nullToEmpty(this.version)).append("\n");
+      content.append("OS: ").append(Strings.nullToEmpty(this.os)).append("\n");
+      content.append("Manufacturer: ").append(Strings.nullToEmpty(this.manufacturer)).append("\n");
+      content.append("Model: ").append(Strings.nullToEmpty(this.model)).append("\n");
       content.append("Date: ").append(dateFormat.format(new Date(event.getTimeStamp()))).append("\n");
       content.append("\n");
       content.append(event.getFormattedMessage()).append("\n");
@@ -105,72 +107,36 @@ public class HockeyappCrashAppender extends AbstractHttpAppender {
     return tmpFile;
   }
 
-  public String getUserId() {
-    return this.userId;
-  }
-
   public void setUserId(String userId) {
     this.userId = userId;
-  }
-
-  public String getEmail() {
-    return this.email;
   }
 
   public void setEmail(String email) {
     this.email = email;
   }
 
-  public String getModel() {
-    return this.model;
-  }
-
   public void setModel(String model) {
     this.model = model;
-  }
-
-  public String getManufacturer() {
-    return this.manufacturer;
   }
 
   public void setManufacturer(String manufacturer) {
     this.manufacturer = manufacturer;
   }
 
-  public String getOs() {
-    return this.os;
-  }
-
   public void setOs(String os) {
     this.os = os;
-  }
-
-  public String getVersion() {
-    return this.version;
   }
 
   public void setVersion(String version) {
     this.version = version;
   }
 
-  public String getPackageName() {
-    return this.packageName;
-  }
-
   public void setPackageName(String packageName) {
     this.packageName = packageName;
   }
 
-  public String getApiToken() {
-    return this.apiToken;
-  }
-
   public void setApiToken(String apiToken) {
     this.apiToken = apiToken;
-  }
-
-  public String getAppId() {
-    return this.appId;
   }
 
   public void setAppId(String appId) {

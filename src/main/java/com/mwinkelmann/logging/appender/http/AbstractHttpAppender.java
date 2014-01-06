@@ -1,5 +1,6 @@
 package com.mwinkelmann.logging.appender.http;
 
+import java.util.Arrays;
 import java.util.Map;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.BlockingQueue;
@@ -190,84 +191,60 @@ public abstract class AbstractHttpAppender extends AppenderBase<ILoggingEvent> i
     }
   }
 
-  public String getRequestUrl() {
-    return this.requestUrl;
-  }
-
   public void setRequestUrl(String requestUrl) {
     this.requestUrl = requestUrl;
   }
 
-  public boolean isError() {
-    return this.error;
-  }
-
-  public void setError(boolean error) {
-    this.error = error;
-  }
-
-  public boolean isWarn() {
-    return this.warn;
-  }
-
-  public void setWarn(boolean warn) {
-    this.warn = warn;
-  }
-
-  public boolean isInfo() {
-    return this.info;
-  }
-
-  public void setInfo(boolean info) {
-    this.info = info;
-  }
-
-  public boolean isDebug() {
-    return this.debug;
-  }
-
-  public void setDebug(boolean debug) {
-    this.debug = debug;
-  }
-
-  public boolean isTrace() {
-    return this.trace;
-  }
-
-  public void setTrace(boolean trace) {
-    this.trace = trace;
-  }
-
-  public int getSuccessStatusCodeMin() {
-    return this.successStatusCodeMin;
+  public String getRequestUrl() {
+    return this.requestUrl;
   }
 
   public void setSuccessStatusCodeMin(int successStatusCodeMin) {
     this.successStatusCodeMin = successStatusCodeMin;
   }
 
-  public int getSuccessStatusCodeMax() {
-    return this.successStatusCodeMax;
-  }
-
   public void setSuccessStatusCodeMax(int successStatusCodeMax) {
     this.successStatusCodeMax = successStatusCodeMax;
-  }
-
-  public Map<String, String> getKeyToParameterMap() {
-    return this.keyToParameterMap;
   }
 
   public void setKeyToParameterMap(Map<String, String> keyToParameterMap) {
     this.keyToParameterMap = keyToParameterMap;
   }
 
-  public int getQueueSize() {
-    return this.queueSize;
-  }
-
   public void setQueueSize(int queueSize) {
     this.queueSize = queueSize;
+  }
+
+  public void addLogState(String state) {
+    if (state != null && state.length() > 0
+      && LogState.valueOf(state.toUpperCase()) != null)
+    {
+      LogState logState = LogState.valueOf(state.toUpperCase());
+      switch (logState) {
+        case ERROR:
+          this.error = true;
+          break;
+        case WARN:
+          this.warn = true;
+          break;
+        case INFO:
+          this.info = true;
+          break;
+        case DEBUG:
+          this.debug = true;
+          break;
+        case TRACE:
+          this.trace = true;
+          break;
+      }
+    } else {
+      throw new IllegalArgumentException("Null ,empty or not the right <logState> property. States: "
+        + Arrays.toString(LogState.values()));
+    }
+  }
+
+  private enum LogState {
+    ERROR, WARN, INFO, DEBUG, TRACE
   }
 
 }

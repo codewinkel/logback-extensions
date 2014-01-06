@@ -4,8 +4,10 @@
 	<groupId>com.mikewinkelmann.logging</groupId>
 	<artifactId>logback-extensions</artifactId>
 	<version>0.0.1-SNAPSHOT</version>
+	<name>logback-extensions</name>
 	<description>Logging project with extensions for logback.</description>
 	<url>https://github.com/mwinkelmann/logback-extension</url>
+
 	<licenses>
 		<license>
 			<name>The MIT License</name>
@@ -13,6 +15,7 @@
 			<distribution>repo</distribution>
 		</license>
 	</licenses>
+
 	<developers>
 		<developer>
 			<id>m.winkelmann</id>
@@ -25,11 +28,10 @@
 		<slf4j.version>1.7.5</slf4j.version>
 		<logback.version>1.0.13</logback.version>
 		<apache.httpcomponent.version>4.3.1</apache.httpcomponent.version>
-		<zabbixj.version>1.0.1</zabbixj.version>
+		<google.guava>15.0</google.guava>
 	</properties>
 
 	<dependencies>
-
 		<dependency>
 			<groupId>org.slf4j</groupId>
 			<artifactId>slf4j-api</artifactId>
@@ -57,9 +59,73 @@
 		<dependency>
 			<groupId>com.google.guava</groupId>
 			<artifactId>guava</artifactId>
-			<version>15.0</version>
+			<version>${google.guava}</version>
 		</dependency>
-
 	</dependencies>
+
+	<scm>
+		<connection>scm:git:git://github.com/mwinkelmann/logback-extension.git</connection>
+		<developerConnection>scm:git:git@github.com:mwinkelmann/logback-extension.git</developerConnection>
+		<url>https://github.com/mwinkelmann/logback-extension</url>
+	</scm>
+
+	<distributionManagement>
+		<snapshotRepository>
+			<id>sonatype-nexus-snapshots</id>
+			<name>Sonatype Nexus snapshot repository</name>
+			<url>https://oss.sonatype.org/content/repositories/snapshots</url>
+		</snapshotRepository>
+		<repository>
+			<id>sonatype-nexus-staging</id>
+			<name>Sonatype Nexus release repository</name>
+			<url>https://oss.sonatype.org/service/local/staging/deploy/maven2/</url>
+		</repository>
+	</distributionManagement>
+
+	<profiles>
+		<profile>
+			<id>release-sign-artifacts</id>
+			<activation>
+				<property>
+					<name>performRelease</name>
+					<value>true</value>
+				</property>
+			</activation>
+			<build>
+				<plugins>
+					<plugin>
+						<groupId>org.apache.maven.plugins</groupId>
+						<artifactId>maven-gpg-plugin</artifactId>
+						<version>1.4</version>
+						<configuration>
+							<passphrase>${gpg.passphrase}</passphrase>
+						</configuration>
+						<executions>
+							<execution>
+								<id>sign-artifacts</id>
+								<phase>verify</phase>
+								<goals>
+									<goal>sign</goal>
+								</goals>
+							</execution>
+						</executions>
+					</plugin>
+				</plugins>
+			</build>
+		</profile>
+	</profiles>
+
+	<build>
+		<plugins>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-release-plugin</artifactId>
+				<version>2.2.2</version>
+				<configuration>
+					<arguments>-Dgpg.passphrase=${gpg.passphrase}</arguments>
+				</configuration>
+			</plugin>
+		</plugins>
+	</build>
 
 </project>
