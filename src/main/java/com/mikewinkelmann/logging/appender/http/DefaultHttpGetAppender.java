@@ -1,4 +1,4 @@
-package com.mwinkelmann.logging.appender.http;
+package com.mikewinkelmann.logging.appender.http;
 
 import org.apache.http.HttpHeaders;
 import org.apache.http.client.methods.HttpGet;
@@ -6,7 +6,7 @@ import org.apache.http.client.methods.HttpRequestBase;
 
 import ch.qos.logback.classic.spi.ILoggingEvent;
 
-import com.mwinkelmann.logging.appender.http.exception.HttpAppenderException;
+import com.mikewinkelmann.logging.appender.http.exception.HttpAppenderException;
 
 /**
  * Sends http get request to the configured request url. 

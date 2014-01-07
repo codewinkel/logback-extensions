@@ -1,4 +1,4 @@
-package com.mwinkelmann.logging.appender.http;
+package com.mikewinkelmann.logging.appender.http;
 
 import java.util.Arrays;
 import java.util.Map;
@@ -22,7 +22,7 @@ import ch.qos.logback.core.AppenderBase;
 import ch.qos.logback.core.util.CloseUtil;
 
 import com.google.common.base.Preconditions;
-import com.mwinkelmann.logging.appender.http.exception.HttpAppenderException;
+import com.mikewinkelmann.logging.appender.http.exception.HttpAppenderException;
 
 /**
  * An abstract base for module specific {@code HttpAppender}

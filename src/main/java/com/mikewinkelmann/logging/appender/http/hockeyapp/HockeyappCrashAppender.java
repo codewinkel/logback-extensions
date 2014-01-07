@@ -1,4 +1,4 @@
-package com.mwinkelmann.logging.appender.http.hockeyapp;
+package com.mikewinkelmann.logging.appender.http.hockeyapp;
 
 import java.io.File;
 import java.io.FileWriter;
@@ -15,8 +15,8 @@ import ch.qos.logback.classic.spi.ILoggingEvent;
 
 import com.google.common.base.Preconditions;
 import com.google.common.base.Strings;
-import com.mwinkelmann.logging.appender.http.AbstractHttpAppender;
-import com.mwinkelmann.logging.appender.http.exception.HttpAppenderException;
+import com.mikewinkelmann.logging.appender.http.AbstractHttpAppender;
+import com.mikewinkelmann.logging.appender.http.exception.HttpAppenderException;
 
 /**
  * Sends the special {@link ILoggingEvent} object to the hockeyapp backend. 

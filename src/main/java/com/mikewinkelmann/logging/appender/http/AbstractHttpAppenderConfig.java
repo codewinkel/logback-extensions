@@ -1,4 +1,4 @@
-package com.mwinkelmann.logging.appender.http;
+package com.mikewinkelmann.logging.appender.http;
 
 /**
  * Default configuration for {@link AbstractHttpAppender}
