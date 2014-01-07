@@ -3,6 +3,7 @@
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>com.mikewinkelmann.logging</groupId>
 	<artifactId>logback-extensions</artifactId>
+	<packaging>jar</packaging>
 	<version>0.0.1-SNAPSHOT</version>
 	<name>logback-extensions</name>
 	<description>Logging project with extensions for logback.</description>
@@ -64,9 +65,9 @@
 	</dependencies>
 
 	<scm>
-		<connection>scm:git:git://github.com/mwinkelmann/logback-extension.git</connection>
+		<connection>scm:git:git://github.com:mwinkelmann/logback-extension.git</connection>
 		<developerConnection>scm:git:git@github.com:mwinkelmann/logback-extension.git</developerConnection>
-		<url>https://github.com/mwinkelmann/logback-extension</url>
+		<url>git@github.com/mwinkelmann/logback-extension.git</url>
 	</scm>
 
 	<distributionManagement>
