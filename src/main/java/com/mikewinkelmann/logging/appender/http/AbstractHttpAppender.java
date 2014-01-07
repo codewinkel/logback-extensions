@@ -22,6 +22,7 @@ import ch.qos.logback.core.AppenderBase;
 import ch.qos.logback.core.util.CloseUtil;
 
 import com.google.common.base.Preconditions;
+import com.mikewinkelmann.logging.appender.LoggingLevel;
 import com.mikewinkelmann.logging.appender.http.exception.HttpAppenderException;
 
 /**
@@ -34,6 +35,7 @@ import com.mikewinkelmann.logging.appender.http.exception.HttpAppenderException;
 public abstract class AbstractHttpAppender extends AppenderBase<ILoggingEvent> implements Runnable {
 
   private static final Logger logger = LoggerFactory.getLogger(AbstractHttpAppender.class);
+
   private CloseableHttpClient httpClient;
   private BlockingQueue<ILoggingEvent> queue;
   private Future<?> task;
@@ -215,11 +217,11 @@ public abstract class AbstractHttpAppender extends AppenderBase<ILoggingEvent> i
     this.queueSize = queueSize;
   }
 
-  public void addLogState(String state) {
+  public void addLoggingLevel(String state) {
     if (state != null && state.length() > 0
-      && LogState.valueOf(state.toUpperCase()) != null)
+      && LoggingLevel.valueOf(state.toUpperCase()) != null)
     {
-      LogState logState = LogState.valueOf(state.toUpperCase());
+      LoggingLevel logState = LoggingLevel.valueOf(state.toUpperCase());
       switch (logState) {
         case ERROR:
           this.error = true;
@@ -238,13 +240,8 @@ public abstract class AbstractHttpAppender extends AppenderBase<ILoggingEvent> i
           break;
       }
     } else {
-      throw new IllegalArgumentException("Null ,empty or not the right <logState> property. States: "
-        + Arrays.toString(LogState.values()));
+      throw new IllegalArgumentException("Null ,empty or not the right <LoggingLevel> property. States: "
+        + Arrays.toString(LoggingLevel.values()));
     }
   }
-
-  private enum LogState {
-    ERROR, WARN, INFO, DEBUG, TRACE
-  }
-
 }

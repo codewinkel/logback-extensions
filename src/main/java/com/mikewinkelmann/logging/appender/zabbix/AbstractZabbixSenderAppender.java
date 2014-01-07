@@ -1,5 +1,6 @@
 package com.mikewinkelmann.logging.appender.zabbix;
 
+import java.util.Arrays;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.Future;
@@ -12,8 +13,8 @@ import ch.qos.logback.classic.spi.ILoggingEvent;
 import ch.qos.logback.core.AppenderBase;
 
 import com.google.common.base.Preconditions;
+import com.mikewinkelmann.logging.appender.LoggingLevel;
 import com.mikewinkelmann.logging.appender.http.AbstractHttpAppender;
-import com.mikewinkelmann.logging.appender.http.AbstractHttpAppenderConfig;
 
 /**
  * Sends an error message to the zabbix backend. 
@@ -25,6 +26,11 @@ import com.mikewinkelmann.logging.appender.http.AbstractHttpAppenderConfig;
 public abstract class AbstractZabbixSenderAppender extends AppenderBase<ILoggingEvent> implements Runnable {
 
   private static final org.slf4j.Logger logger = LoggerFactory.getLogger(AbstractHttpAppender.class);
+  private static final boolean DEFAULT_WARN = false;
+  private static final boolean DEFAULT_ERROR = false;
+  private static final boolean DEFAULT_INFO = false;
+  private static final boolean DEFAULT_DEBUG = false;
+  private static final boolean DEFAULT_TRACE = false;
 
   private BlockingQueue<ILoggingEvent> queue;
   private Future<?> task;
@@ -35,12 +41,12 @@ public abstract class AbstractZabbixSenderAppender extends AppenderBase<ILogging
   private int zabbixServerPort;
 
   // configuration params (optional because defaults are set)
-  private boolean error = AbstractHttpAppenderConfig.DEFAULT_ERROR;
-  private boolean warn = AbstractHttpAppenderConfig.DEFAULT_WARN;
-  private boolean info = AbstractHttpAppenderConfig.DEFAULT_INFO;
-  private boolean debug = AbstractHttpAppenderConfig.DEFAULT_DEBUG;
-  private boolean trace = AbstractHttpAppenderConfig.DEFAULT_TRACE;
-  private int queueSize = AbstractHttpAppenderConfig.DEFAULT_QUEUE_SIZE;
+  private boolean error = DEFAULT_ERROR;
+  private boolean warn = DEFAULT_WARN;
+  private boolean info = DEFAULT_INFO;
+  private boolean debug = DEFAULT_DEBUG;
+  private boolean trace = DEFAULT_TRACE;
+  private int queueSize = 0;
 
   protected AbstractZabbixSenderAppender()
   {}
@@ -103,23 +109,23 @@ public abstract class AbstractZabbixSenderAppender extends AppenderBase<ILogging
         switch (event.getLevel().levelInt) {
           case Level.ERROR_INT:
             if (error)
-              this.execute(event);
+              this.executeError(event);
             break;
           case Level.WARN_INT:
             if (warn)
-              this.execute(event);
+              this.executeWarn(event);
             break;
           case Level.INFO_INT:
             if (info)
-              this.execute(event);
+              this.executeInfo(event);
             break;
           case Level.DEBUG_INT:
             if (debug)
-              this.execute(event);
+              this.executeDebug(event);
             break;
           case Level.TRACE_INT:
             if (trace)
-              this.execute(event);
+              this.executeTrace(event);
             break;
           default:
             logger.error("Unknown logging level: " + event.getLevel().levelStr);
@@ -134,67 +140,73 @@ public abstract class AbstractZabbixSenderAppender extends AppenderBase<ILogging
     }
   }
 
-  private void execute(ILoggingEvent event) {
-    //    ZABBIX_SENDER
-    //
-    //    Section: Maintenance Commands (8)
-    //    Updated: 5 July 2011
-    //    Index Return to Main Contents
-    //     
-    //    NAME
-    //
-    //    zabbix_sender - Zabbix sender utility.  
-    //    SYNOPSIS
-    //
-    //    zabbix_sender [-hpzvIV] {-kso | [-T] -i <inputfile>} [-c <config-file>]  
-    //    DESCRIPTION
-    //
-    //    zabbix_sender is a command line utility for sending data to a remote Zabbix server. On the Zabbix server an item of type Zabbix trapper should be created with corresponding key. Note that incoming values will only be accepted from hosts specified in Allowed hosts field for this item.
-    //     
-    //
-    //    Options
-    //
-    //    -c, --config <config-file>
-    //    Specify agent configuration file for reading server details.
-    //    -z, --zabbix-server <server>
-    //    Hostname or IP address of Zabbix server.
-    //    -p, --port <port>
-    //    Specify port number of server trapper running on the server. Default is 10051.
-    //    -s, --host <host>
-    //    Specify host name as registered in Zabbix front-end. Host IP address and DNS name will not work.
-    //    -I, --source-address <IP>
-    //    Specify source IP address.
-    //    -k, --key <key>
-    //    Specify item key to send value to.
-    //    -o, --value <value>
-    //    Specify value.
-    //    -i, --input-file <inputfile>
-    //    Load values from input file. Specify - for standard input. Each line of file contains whitespace delimited: <hostname> <key> <value>. Specify - in <hostname> to use hostname from configuration file or --host argument.
-    //    -T, --with-timestamps
-    //    Each line of file contains whitespace delimited: <hostname> <key> <timestamp> <value>. This can be used with --input-file option. Timestamp should be specified in Unix timestamp format.
-    //    -r, --real-time
-    //    Send values one by one as soon as they are received. This can be used when reading from standard input.
-    //    -v, --verbose
-    //    Verbose mode, -vv for more details.
-    //    -h, --help
-    //    Display this help and exit.
-    //    -V, --version
-    //    Output version information and exit.
-    //     
-    //    EXAMPLES
-    //
-    //    zabbix_sender -c /etc/zabbix/zabbix_agentd.conf -s Monitored Host -k mysql.queries -o 342.45
-    //    Send 342.45 as the value for mysql.queries key in Monitored Host host using Zabbix server defined in agent daemon configuration file.
-    //
-    //    zabbix_sender -z 192.168.1.113 -i data_values.txt
-    //
-    //    Send values from file data_values.txt to server with IP 192.168.1.113. Host names and keys are defined in the file.
-    //
-    //    echo - hw.serial.number 1287872261 SQ4321ASDF | zabbix_sender -c /etc/zabbix/zabbix_agentd.conf -T -i -
-    //
-    //    Send a timestamped value from the commandline to Zabbix server, specified in the agent daemon configuration file. Dash in the input data indicates that hostname also should be used from the same configuration file.
-    //
-    //     
+  private void executeTrace(ILoggingEvent event) {
+    // TODO Auto-generated method stub
+
+  }
+
+  private void executeDebug(ILoggingEvent event) {
+    // TODO Auto-generated method stub
+
+  }
+
+  private void executeInfo(ILoggingEvent event) {
+    // TODO Auto-generated method stub
+
+  }
+
+  private void executeWarn(ILoggingEvent event) {
+    // TODO Auto-generated method stub
+
+  }
+
+  private void executeError(ILoggingEvent event) {
+    // TODO Auto-generated method stub
+
+  }
+
+  public void setZabbixHostName(String zabbixHostName) {
+    this.zabbixHostName = zabbixHostName;
+  }
+
+  public void setZabbixServerAddress(String zabbixServerAddress) {
+    this.zabbixServerAddress = zabbixServerAddress;
+  }
+
+  public void setZabbixServerPort(int zabbixServerPort) {
+    this.zabbixServerPort = zabbixServerPort;
+  }
+
+  public void setQueueSize(int queueSize) {
+    this.queueSize = queueSize;
+  }
+
+  public void addLoggingLevel(String state) {
+    if (state != null && state.length() > 0
+      && LoggingLevel.valueOf(state.toUpperCase()) != null)
+    {
+      LoggingLevel logState = LoggingLevel.valueOf(state.toUpperCase());
+      switch (logState) {
+        case ERROR:
+          this.error = true;
+          break;
+        case WARN:
+          this.warn = true;
+          break;
+        case INFO:
+          this.info = true;
+          break;
+        case DEBUG:
+          this.debug = true;
+          break;
+        case TRACE:
+          this.trace = true;
+          break;
+      }
+    } else {
+      throw new IllegalArgumentException("Null ,empty or not the right <LoggingLevel> property. States: "
+        + Arrays.toString(LoggingLevel.values()));
+    }
   }
 
 }
