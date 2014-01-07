@@ -41,17 +41,17 @@ Some properties are required some are optional
 
 **optional** properties are:
 
-* `logState` every log state you want to execute a GET call. Available states are the known: ERROR, WARN, INFO, DEBUG, TRACE you can also configure more than one log state with more logState tags - default: nothing
+* `loggingLevel` every log state you want to execute a GET call. Available states are the known: ERROR, WARN, INFO, DEBUG, TRACE you can also configure more than one log state with more loggingLevel tags - default: nothing
 * `successStatusCodeMin` minimum successful http status code - default: 200
 * `successStatusCodeMax` maximum successful http status code - default: 299
 * `queueSize` size of the executing queue @TODO - default: 0
 
 ####Example  
 
-    <appender name="HTTPGETAPPENDER" class="com.mwinkelmann.logging.appender.http.DefaulthttpGetAppender">
+    <appender name="HTTPGETAPPENDER" class="com.mikewinkelmann.logging.appender.http.DefaulthttpGetAppender">
 		<requestUrl>http://localhost:8080/testservice</requestUrl>
-		<logState>ERROR</logState>
-		<logState>WARN</logState>
+		<loggingLevel>ERROR</loggingLevel>
+		<loggingLevel>WARN</loggingLevel>
 		<successStatusCodeMin>200</successStatusCodeMin>
 		<successStatusCodeMax>299</successStatusCodeMax>
 		<queueSize>0</queueSize>
@@ -70,7 +70,7 @@ Some properties are required some are optional
 
 **optional** properties are:
 
-* `logState` every log state you want to execute a GET call. Available states are the known: ERROR, WARN, INFO, DEBUG, TRACE you can also configure more than one log state with more logState tags - default: nothing
+* `loggingLevel` every log state you want to execute a GET call. Available states are the known: ERROR, WARN, INFO, DEBUG, TRACE you can also configure more than one log state with more loggingLevel tags - default: nothing
 * `successStatusCodeMin` minimum successful http status code - default: 200
 * `successStatusCodeMax` maximum successful http status code - default: 299
 * `queueSize` size of the executing reporting queue @TODO - default: 0
@@ -83,9 +83,9 @@ Some properties are required some are optional
 
 ####Example  
 
-    <appender name="HOCKEYAPPCRASHAPPENDER" class="com.mwinkelmann.logging.appender.http.DefaulthttpGetAppender">
+    <appender name="HOCKEYAPPCRASHAPPENDER" class="com.mikewinkelmann.logging.appender.http.DefaulthttpGetAppender">
 		<!-- ##### general config ##### -->
-		<logState>ERROR</logState>
+		<loggingLevel>ERROR</loggingLevel>
 		<successStatusCodeMin>200</successStatusCodeMin>
 		<successStatusCodeMax>299</successStatusCodeMax>
 		<queueSize>0</queueSize>
