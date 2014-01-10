@@ -15,7 +15,7 @@ Current version is available at central repository
     <dependencies>
         ...
         <dependency>
-	        <groupId>com.mikewinkelmann.logging</groupId>
+	        <groupId>com.mikewinkelmann</groupId>
 		    <artifactId>logback-extensions</artifactId>
 		    <version>0.0.1-SNAPSHOT</version>
 	    </dependency>
