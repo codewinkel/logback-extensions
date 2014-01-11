@@ -26,7 +26,6 @@
 	</developers>
 
 	<properties>
-		<scm.url>scm:git:git://github.com/mwinkelmann/logback-extension.git</scm.url>
 		<slf4j.version>1.7.5</slf4j.version>
 		<logback.version>1.0.13</logback.version>
 		<apache.httpcomponent.version>4.3.1</apache.httpcomponent.version>
@@ -67,9 +66,9 @@
 
 	<scm>
 		<tag>HEAD</tag>
-		<url>${scm.url}</url>
-		<connection>${scm.url}</connection>
-		<developerConnection>${scm.url}</developerConnection>
+		<url>https://github.com/mwinkelmann/logback-extension</url>
+		<connection>scm:git:git://github.com/mwinkelmann/logback-extension.git</connection>
+		<developerConnection>scm:git:git://github.com:mwinkelmann/logback-extension.git</developerConnection>
 	</scm>
 
 	<distributionManagement>
