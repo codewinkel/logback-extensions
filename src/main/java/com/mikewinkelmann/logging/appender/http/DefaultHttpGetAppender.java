@@ -21,7 +21,6 @@ public class DefaultHttpGetAppender extends AbstractHttpAppender {
     final HttpGet httpRequest = new HttpGet(this.getRequestUrl());
     httpRequest.addHeader(HttpHeaders.CONTENT_TYPE, "application/json");
     httpRequest.addHeader(HttpHeaders.ACCEPT, "application/json");
-    // TODO implement usage of parameter map
     return httpRequest;
   }
 

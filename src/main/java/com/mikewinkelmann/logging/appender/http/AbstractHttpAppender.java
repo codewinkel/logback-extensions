@@ -1,7 +1,6 @@
 package com.mikewinkelmann.logging.appender.http;
 
 import java.util.Arrays;
-import java.util.Map;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.Future;
@@ -51,7 +50,6 @@ public abstract class AbstractHttpAppender extends AppenderBase<ILoggingEvent> i
   private boolean trace = AbstractHttpAppenderConfig.DEFAULT_TRACE;
   private int successStatusCodeMin = AbstractHttpAppenderConfig.DEFAULT_SUCCESS_CODE_MIN;
   private int successStatusCodeMax = AbstractHttpAppenderConfig.DEFAULT_SUCCESS_CODE_MIN;
-  private Map<String, String> keyToParameterMap = null;
   private int queueSize = AbstractHttpAppenderConfig.DEFAULT_QUEUE_SIZE;
 
   protected AbstractHttpAppender()
@@ -207,10 +205,6 @@ public abstract class AbstractHttpAppender extends AppenderBase<ILoggingEvent> i
 
   public void setSuccessStatusCodeMax(int successStatusCodeMax) {
     this.successStatusCodeMax = successStatusCodeMax;
-  }
-
-  public void setKeyToParameterMap(Map<String, String> keyToParameterMap) {
-    this.keyToParameterMap = keyToParameterMap;
   }
 
   public void setQueueSize(int queueSize) {
