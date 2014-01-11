@@ -67,8 +67,8 @@
 	<scm>
 		<tag>HEAD</tag>
 		<url>https://github.com/mwinkelmann/logback-extension</url>
-		<connection>https://github.com/mwinkelmann/logback-extension.git</connection>
-		<developerConnection>https://github.com/mwinkelmann/logback-extension.git</developerConnection>
+		<connection>scm:git:git@github.com/mwinkelmann/logback-extensions.git</connection>
+		<developerConnection>scm:git:git@github.com:mwinkelmann/logback-extensions.git</developerConnection>
 	</scm>
 
 	<distributionManagement>
