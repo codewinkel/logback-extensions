@@ -1,7 +1,9 @@
 package com.mikewinkelmann.logging.appender.http.hockeyapp;
 
+import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileWriter;
+import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 
@@ -10,6 +12,8 @@ import org.apache.http.client.methods.HttpPost;
 import org.apache.http.client.methods.HttpRequestBase;
 import org.apache.http.entity.mime.MultipartEntityBuilder;
 import org.apache.http.entity.mime.content.FileBody;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import ch.qos.logback.classic.spi.ILoggingEvent;
 
@@ -26,19 +30,17 @@ import com.mikewinkelmann.logging.appender.http.exception.HttpAppenderException;
  *
  */
 public class HockeyappCrashAppender extends AbstractHttpAppender {
-  // @TODO implememt checks for filesize
-  private static final String DATE_FORMAT = "yyyy-MM-dd HH:mm:ss";
-  private static final String HOCKEYAPP_CRASH_API_URL_APPID_PLACEHOLDER = "{APPID}";
-  private static final String HOCKEYAPP_CRASH_API_URL = "https://rink.hockeyapp.net/api/2/apps/"
-    + HOCKEYAPP_CRASH_API_URL_APPID_PLACEHOLDER + "/crashes/upload";
+
+
+  private static final Logger logger = LoggerFactory.getLogger(HockeyappCrashAppender.class);
 
   // configuration
   private SimpleDateFormat dateFormat = null;
   private String userId, contact, model, manufacturer, os, version, packageName, apiToken, appId, requestUrl;
 
   public HockeyappCrashAppender() {
-    this.setRequestUrl(HOCKEYAPP_CRASH_API_URL);
-    dateFormat = new SimpleDateFormat(DATE_FORMAT);
+    this.setRequestUrl(HockeyAppCrashAppenderConfig.HOCKEYAPP_CRASH_API_URL);
+    dateFormat = new SimpleDateFormat(HockeyAppCrashAppenderConfig.DATE_FORMAT);
   }
 
   @Override
@@ -47,22 +49,21 @@ public class HockeyappCrashAppender extends AbstractHttpAppender {
     Preconditions.checkNotNull(this.apiToken, "ApiToken must not be null");
     Preconditions.checkNotNull(this.appId, "AppId must not be null");
     Preconditions.checkNotNull(this.packageName, "PackageName must not be null");
-    requestUrl = this.getRequestUrl().replace(HOCKEYAPP_CRASH_API_URL_APPID_PLACEHOLDER, this.appId);
+    requestUrl =
+      this.getRequestUrl().replace(HockeyAppCrashAppenderConfig.HOCKEYAPP_CRASH_API_URL_APPID_PLACEHOLDER, this.appId);
   }
 
   @Override
   public HttpRequestBase createHttpRequest(ILoggingEvent event) throws HttpAppenderException {
 
+    logger.debug("Create HttpRequest for HockeyApp call against crash api Event: " + event.getLevel().levelStr);
     final HttpPost httpRequest = new HttpPost(requestUrl);
     httpRequest.addHeader("X-HockeyAppToken", this.apiToken);
 
-    File crashFile = this.createCrashLogFile(event);
-    FileBody crashFileBody = new FileBody(crashFile);
-
     MultipartEntityBuilder multipartEntityBuilder = MultipartEntityBuilder.create()
-      .addPart("log", crashFileBody);
-    //  TODO implement .addBinaryBody("description", this.createDescriptionLogFile(event))
-    //  TODO implement .addBinaryBody("attachment", this.createAttatchmentFile(event))
+      .addPart("log", createCrashFileBody(event));
+    //  TODO implement .addPart("description", this.createDescriptionLogFile(event))
+    //  TODO implement .addPart("attachment", this.createAttatchmentFile(event))
     if (this.userId != null)
       multipartEntityBuilder.addTextBody("userID", this.userId);
     if (this.contact != null)
@@ -75,8 +76,17 @@ public class HockeyappCrashAppender extends AbstractHttpAppender {
     return httpRequest;
   }
 
-  private File createCrashLogFile(ILoggingEvent event) throws HttpAppenderException {
+  private FileBody createCrashFileBody(ILoggingEvent event) throws HttpAppenderException {
+    String[] splittedMessage = event.getFormattedMessage().split("\n");
+    File crashFile = this.createCrashLogFile(splittedMessage, event.getTimeStamp(), 0);
+    FileBody crashFileBody = new FileBody(crashFile);
+    return crashFileBody;
+  }
+
+  private File createCrashLogFile(String[] splittedMessage, long timestamp, int rowsToDelete)
+    throws HttpAppenderException {
     FileWriter fileWriter = null;
+    BufferedWriter bufferedWriter = null;
     File tmpFile = null;
     try {
       StringBuffer content = new StringBuffer();
@@ -87,16 +97,37 @@ public class HockeyappCrashAppender extends AbstractHttpAppender {
       content.append("OS: ").append(Strings.nullToEmpty(this.os)).append("\n");
       content.append("Manufacturer: ").append(Strings.nullToEmpty(this.manufacturer)).append("\n");
       content.append("Model: ").append(Strings.nullToEmpty(this.model)).append("\n");
-      content.append("Date: ").append(dateFormat.format(new Date(event.getTimeStamp()))).append("\n");
+      content.append("Date: ").append(dateFormat.format(new Date(timestamp))).append("\n");
       content.append("\n");
-      content.append(event.getFormattedMessage()).append("\n");
+      content.append(this.parseStringArrayMessage(splittedMessage, rowsToDelete)).append("\n");
 
       fileWriter = new FileWriter(tmpFile);
-      fileWriter.write(content.toString());
+      bufferedWriter = new BufferedWriter(fileWriter);
+      bufferedWriter.write(content.toString());
+
+      double bytes = tmpFile.length();
+      double kilobytes = (bytes / 1024);
+
+      if (kilobytes > HockeyAppCrashAppenderConfig.MAXIMUM_CRASH_FILE_SIZE_KILOBYTES)
+      {
+        logger.debug("Created crash file size to big for HockeyApp API Size: "
+          + kilobytes + " MaxSize: " + HockeyAppCrashAppenderConfig.MAXIMUM_CRASH_FILE_SIZE_KILOBYTES);
+        tmpFile.delete();
+        tmpFile = createCrashLogFile(splittedMessage, timestamp, rowsToDelete++);
+      }
     } catch (Exception e) {
       throw new HttpAppenderException("Error due to create crash log file:", e);
     } finally
     {
+      if (bufferedWriter != null)
+      {
+        try {
+          bufferedWriter.flush();
+          bufferedWriter.close();
+        } catch (IOException e) {
+          throw new HttpAppenderException("Error due to close crash log buffered file writer:", e);
+        }
+      }
       if (fileWriter != null)
         try {
           fileWriter.close();
@@ -105,6 +136,23 @@ public class HockeyappCrashAppender extends AbstractHttpAppender {
         }
     }
     return tmpFile;
+  }
+
+  private String parseStringArrayMessage(String[] splittedMessage, int rowsToDelete) {
+    logger.debug("Parse exception message and remove "
+      + rowsToDelete + " rows to create the correct crash log file size.");
+    StringBuffer buffer = new StringBuffer();
+    int messageLenght = splittedMessage.length;
+    int columnIndex = 0;
+    for (String messageColumn : splittedMessage) {
+      buffer.append(messageColumn).append("\n");
+      columnIndex++;
+      if (columnIndex == (messageLenght - rowsToDelete))
+      {
+        break;
+      }
+    }
+    return buffer.toString();
   }
 
   public void setUserId(String userId) {
