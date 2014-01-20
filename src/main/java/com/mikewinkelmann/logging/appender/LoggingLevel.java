@@ -1,7 +1,7 @@
 package com.mikewinkelmann.logging.appender;
 
 /**
- * Enum for all supported logging levels
+ * Enum for all supported logging levels.
  * 
  * @author Mike Winkelmann
  *

@@ -17,7 +17,7 @@ Current version is available at central repository
         <dependency>
 	        <groupId>com.mikewinkelmann</groupId>
 		    <artifactId>logback-extensions</artifactId>
-		    <version>0.0.2</version>
+		    <version>0.0.3</version>
 	    </dependency>
         ...
     </dependencies>
@@ -44,7 +44,7 @@ Some properties are required some are optional
 * `loggingLevel` every log state you want to execute a GET call. Available states are the known: ERROR, WARN, INFO, DEBUG, TRACE you can also configure more than one log state with more loggingLevel tags - default: nothing
 * `successStatusCodeMin` minimum successful http status code - default: 200
 * `successStatusCodeMax` maximum successful http status code - default: 299
-* `queueSize` size of the executing queue @TODO - default: 0
+* `queueSize` size of the executing queue @TODO - default: 10
 
 ####Example  
 
@@ -54,7 +54,7 @@ Some properties are required some are optional
 		<loggingLevel>WARN</loggingLevel>
 		<successStatusCodeMin>200</successStatusCodeMin>
 		<successStatusCodeMax>299</successStatusCodeMax>
-		<queueSize>0</queueSize>
+		<queueSize>10</queueSize>
 	</appender>
 	
 ###HockeyAppCrashAppender
@@ -73,7 +73,7 @@ Some properties are required some are optional
 * `loggingLevel` every log state you want to execute a GET call. Available states are the known: ERROR, WARN, INFO, DEBUG, TRACE you can also configure more than one log state with more loggingLevel tags - default: nothing
 * `successStatusCodeMin` minimum successful http status code - default: 200
 * `successStatusCodeMax` maximum successful http status code - default: 299
-* `queueSize` size of the executing reporting queue @TODO - default: 0
+* `queueSize` size of the executing reporting queue @TODO - default: 10
 * `userId` a string with a user, deviceId ..., limited to 255 chars - default: empty
 * `contact` a string with contact information ..., limited to 255 chars - default: empty
 * `model` model of the device where this appender is running - default: empty
@@ -88,7 +88,7 @@ Some properties are required some are optional
 		<loggingLevel>ERROR</loggingLevel>
 		<successStatusCodeMin>200</successStatusCodeMin>
 		<successStatusCodeMax>299</successStatusCodeMax>
-		<queueSize>0</queueSize>
+		<queueSize>10</queueSize>
 		
 		<!-- ##### hockeyapp config ##### -->
 		<apiToken>123Abc456deF789Ghi0</apiToken>
