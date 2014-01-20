@@ -11,7 +11,7 @@ public class AbstractHttpAppenderConfig {
   // general
   public static final int DEFAULT_SUCCESS_CODE_MAX = 299;
   public static final int DEFAULT_SUCCESS_CODE_MIN = 200;
-  public static final int DEFAULT_QUEUE_SIZE = 5;
+  public static final int DEFAULT_QUEUE_SIZE = 10;
 
   // notify levels
   public static final boolean DEFAULT_WARN = false;
