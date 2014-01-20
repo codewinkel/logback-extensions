@@ -78,7 +78,10 @@ public abstract class AbstractHttpAppender extends AppenderBase<ILoggingEvent> i
 
   @Override
   protected void append(ILoggingEvent event) {
-    if (event == null || !isStarted()) return;
+    if (event == null || !isStarted())
+    {
+      return;
+    }
     queue.offer(event);
   }
 
