@@ -3,7 +3,7 @@
 	<groupId>com.mikewinkelmann</groupId>
 	<artifactId>logback-extensions</artifactId>
 	<packaging>jar</packaging>
-	<version>0.0.3</version>
+	<version>0.0.3-SNAPSHOT</version>
 	<name>logback-extensions</name>
 	<description>Logging project with extensions for logback.</description>
 	<url>https://github.com/mwinkelmann/logback-extension</url>
