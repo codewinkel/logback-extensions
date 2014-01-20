@@ -83,7 +83,7 @@ Some properties are required some are optional
 
 ####Example  
 
-    <appender name="HOCKEYAPPCRASHAPPENDER" class="com.mikewinkelmann.logging.appender.http.DefaulthttpGetAppender">
+    <appender name="HOCKEYAPPCRASHAPPENDER" class="com.mikewinkelmann.logging.appender.http.hockeyapp.HockeyAppCrashAppender">
 		<!-- ##### general config ##### -->
 		<loggingLevel>ERROR</loggingLevel>
 		<successStatusCodeMin>200</successStatusCodeMin>

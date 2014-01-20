@@ -30,15 +30,15 @@ import com.mikewinkelmann.logging.appender.http.exception.HttpAppenderException;
  * @author Mike Winkelmann
  *
  */
-public class HockeyappCrashAppender extends AbstractHttpAppender {
+public class HockeyAppCrashAppender extends AbstractHttpAppender {
 
-  private static final Logger logger = LoggerFactory.getLogger(HockeyappCrashAppender.class);
+  private static final Logger logger = LoggerFactory.getLogger(HockeyAppCrashAppender.class);
 
   // configuration
   private SimpleDateFormat dateFormat = null;
   private String userId, contact, model, manufacturer, os, version, packageName, apiToken, appId, requestUrl;
 
-  public HockeyappCrashAppender() {
+  public HockeyAppCrashAppender() {
     this.setRequestUrl(HockeyAppCrashAppenderConfig.HOCKEYAPP_CRASH_API_URL);
     dateFormat = new SimpleDateFormat(HockeyAppCrashAppenderConfig.DATE_FORMAT);
   }
