@@ -94,10 +94,10 @@ Some properties are required some are optional
 		<apiToken>123Abc456deF789Ghi0</apiToken>
 		<appId>1234567apId7654321</appId>
 		<packageName>your.package.name</packageName>
-		<userId>jeffrey</userId>
-		<contact>test.test@test4711.com</contact>
-		<model>m1.large</model>
+		<userId>mwcom</userId>
+		<contact>contact@mikewinkelmann.com</contact>
+		<model>server1.mikewinkelmann.com</model>
 		<manufacturer>amazon-aws</manufacturer>
 		<os>cent os</os>
-		<version>0.0.1</version>
+		<version>specialwebservice1</version>
 	</appender>
