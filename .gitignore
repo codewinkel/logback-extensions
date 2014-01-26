@@ -1,10 +1,5 @@
-*.class
-
-# Package Files #
-*.jar
-*.war
-*.ear
-
 /target
-.*
 /delpoy.sh
+/.classpath
+/.project
+/.settings
