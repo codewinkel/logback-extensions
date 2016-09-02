@@ -17,7 +17,7 @@ Current version is available at central repository
         <dependency>
 	        <groupId>com.mikewinkelmann</groupId>
 		    <artifactId>logback-extensions</artifactId>
-		    <version>0.0.5</version>
+		    <version>{CURRENT_VERSION}</version>
 	    </dependency>
         ...
     </dependencies>
@@ -101,3 +101,9 @@ Some properties are required some are optional
 		<os>cent os</os>
 		<version>specialwebservice1</version>
 	</appender>
+	
+
+#TODOs
+* create CI plan 
+* switch to my new group id
+* implement .addPart("attachment", this.createAttatchmentFile(event))
