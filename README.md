@@ -1,6 +1,6 @@
-#logback-extensions
+# logback-extensions
 
-##About
+## About
 
 The `logback-extensions` module is an add-on for your logback context.
 This module does the following things:
@@ -8,7 +8,7 @@ This module does the following things:
 * `DefaultHttpGetAppender`: the DefaultHttpGetAppender can send some GET requests to an configured requestUrl if something is logged.
 * `HockeyAppCrashAppender`: the HockeyAppCrashAppender can send the stack trace of e.g. an exception of your program to hockeyapp, so hockey app can visualize your *exception flows* and create tickets in your bug tracker system automatically.
 
-##Maven
+## Maven
 
 Current version is available at central repository
 
@@ -22,7 +22,7 @@ Current version is available at central repository
         ...
     </dependencies>
 
-##Configuration
+## Configuration
 First you must configure your appender in your **logback.xml** - see below. As a last resort you must add your configured appender to your root appender:
 
     <root level="INFO">
@@ -30,9 +30,9 @@ First you must configure your appender in your **logback.xml** - see below. As a
 		<appender-ref ref="HOCKEYAPPCRASHAPPENDER" />
 	</root>
 
-###DefaultHttpGetAppender
+### DefaultHttpGetAppender
 This appender sends some log file with the specific message to the hockey app crash backend.
-####Properties
+#### Properties
 Some properties are required some are optional
 
 **required** properties are:
@@ -46,7 +46,7 @@ Some properties are required some are optional
 * `successStatusCodeMax` maximum successful http status code - default: 299
 * `queueSize` size of the executing queue @TODO - default: 10
 
-####Example  
+#### Example  
 
     <appender name="HTTPGETAPPENDER" class="com.mikewinkelmann.logging.appender.http.DefaulthttpGetAppender">
 		<requestUrl>http://localhost:8080/testservice</requestUrl>
@@ -57,9 +57,9 @@ Some properties are required some are optional
 		<queueSize>10</queueSize>
 	</appender>
 	
-###HockeyAppCrashAppender
+### HockeyAppCrashAppender
 This appender sends some log file with the specific message to the hockey app crash backend.
-####Properties
+#### Properties
 Some properties are required some are optional
 
 **required** properties are:
@@ -81,7 +81,7 @@ Some properties are required some are optional
 * `os` operating system of the device where this appender is running - default: empty
 * `version` version of the application where this appender is running in - default: empty
 
-####Example  
+#### Example  
 
     <appender name="HOCKEYAPPCRASHAPPENDER" class="com.mikewinkelmann.logging.appender.http.hockeyapp.HockeyAppCrashAppender">
 		<!-- ##### general config ##### -->
@@ -103,7 +103,7 @@ Some properties are required some are optional
 	</appender>
 	
 
-#TODOs
+# TODOs
 * create CI plan 
 * switch to my new group id
 * implement .addPart("attachment", this.createAttatchmentFile(event))
