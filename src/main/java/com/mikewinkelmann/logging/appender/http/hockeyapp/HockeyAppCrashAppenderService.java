@@ -27,7 +27,7 @@ public class HockeyAppCrashAppenderService {
     private SimpleDateFormat dateFormat = null;
     private String model, manufacturer, os, version, packageName;
 
-    public HockeyAppCrashAppenderService(String model, String manufacturer, String os, String version, String packageName) {
+    HockeyAppCrashAppenderService(String model, String manufacturer, String os, String version, String packageName) {
         this.dateFormat = new SimpleDateFormat(HockeyAppCrashAppenderConfig.DATE_FORMAT);
         this.model = model;
         this.manufacturer = manufacturer;

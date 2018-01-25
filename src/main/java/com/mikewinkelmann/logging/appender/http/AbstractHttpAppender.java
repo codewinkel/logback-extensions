@@ -81,11 +81,9 @@ public abstract class AbstractHttpAppender extends AppenderBase<ILoggingEvent> i
         queue.offer(event);
     }
 
-    @Override
     public final void run() {
         try {
             while (!Thread.currentThread().isInterrupted()) {
-
                 if (this.httpClient == null)
                     break;
 
@@ -209,7 +207,7 @@ public abstract class AbstractHttpAppender extends AppenderBase<ILoggingEvent> i
 
     public void addLoggingLevel(String state) {
         if (state == null || state.length() <= 0) {
-            throw new IllegalArgumentException("Null ,empty or not the right <LoggingLevel> property. States: "
+            throw new IllegalArgumentException("null, empty or not the right <LoggingLevel> property. States: "
                     + Arrays.toString(LoggingLevel.values()));
         }
         LoggingLevel logState = LoggingLevel.valueOf(state.toUpperCase());
