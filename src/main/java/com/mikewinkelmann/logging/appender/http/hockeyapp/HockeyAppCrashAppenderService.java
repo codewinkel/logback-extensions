@@ -86,6 +86,37 @@ public class HockeyAppCrashAppenderService {
         return tmpFile;
     }
 
+    private File createDescriptionLogFile(String formattedMessage, long timestamp)
+            throws HttpAppenderException {
+        FileWriter fileWriter = null;
+        BufferedWriter bufferedWriter = null;
+        File tmpFile = null;
+        boolean errorOnClose = false;
+        try {
+            StringBuffer content = new StringBuffer(HockeyAppCrashAppenderConfig.MAXIMUM_DESCRIPTION_FILE_SIZE_BYTES);
+
+            content.append("Description: ").append(formattedMessage).append("\n");
+            content.append("Date: ").append(dateFormat.format(new Date(timestamp))).append("\n");
+            content.append("\n");
+            content.trimToSize();
+
+            tmpFile = File.createTempFile("description", ".tmp.log");
+            fileWriter = new FileWriter(tmpFile);
+            bufferedWriter = new BufferedWriter(fileWriter);
+            bufferedWriter.write(content.toString());
+        } catch (Exception e) {
+            throw new HttpAppenderException("Error due to create description log file:", e);
+        } finally {
+            errorOnClose = closeBufferedWriter(bufferedWriter)
+                    && closeFileWriter(fileWriter);
+        }
+        if (errorOnClose) {
+            throw new HttpAppenderException("Error closing FileWriter or BufferedWriter");
+        }
+        logger.debug("Created crash log file content in tempFile: " + tmpFile.getAbsolutePath());
+        return tmpFile;
+    }
+
     private boolean closeBufferedWriter(BufferedWriter bufferedWriter) {
         if (bufferedWriter == null) {
             return true;
@@ -111,46 +142,6 @@ public class HockeyAppCrashAppenderService {
             closed = false;
         }
         return closed;
-    }
-
-    private File createDescriptionLogFile(String formattedMessage, long timestamp)
-            throws HttpAppenderException {
-        FileWriter fileWriter = null;
-        BufferedWriter bufferedWriter = null;
-        File tmpFile = null;
-        try {
-            StringBuffer content = new StringBuffer(HockeyAppCrashAppenderConfig.MAXIMUM_DESCRIPTION_FILE_SIZE_BYTES);
-            tmpFile = File.createTempFile("description", ".tmp.log");
-
-            content.append("Description: ").append(formattedMessage).append("\n");
-            content.append("Date: ").append(dateFormat.format(new Date(timestamp))).append("\n");
-            content.append("\n");
-            content.trimToSize();
-
-            fileWriter = new FileWriter(tmpFile);
-            bufferedWriter = new BufferedWriter(fileWriter);
-            bufferedWriter.write(content.toString());
-
-        } catch (Exception e) {
-            throw new HttpAppenderException("Error due to create description log file:", e);
-        } finally {
-            if (bufferedWriter != null) {
-                try {
-                    bufferedWriter.flush();
-                    bufferedWriter.close();
-                } catch (IOException e) {
-                    throw new HttpAppenderException("Error due to close description log buffered file writer:", e);
-                }
-            }
-            if (fileWriter != null)
-                try {
-                    fileWriter.close();
-                } catch (Exception e) {
-                    throw new HttpAppenderException("Error due to close description log file writer:", e);
-                }
-        }
-        logger.debug("Created crash log file content in tempFile: " + tmpFile.getAbsolutePath());
-        return tmpFile;
     }
 
     private String parseStringArrayMessage(IThrowableProxy throwableProxy) {
