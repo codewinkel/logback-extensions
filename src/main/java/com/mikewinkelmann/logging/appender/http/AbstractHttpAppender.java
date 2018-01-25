@@ -173,7 +173,7 @@ public abstract class AbstractHttpAppender extends AppenderBase<ILoggingEvent> i
             HttpResponse proxyResponse = httpClient.execute(httpRequest);
 
             StatusLine statusLine = proxyResponse.getStatusLine();
-            Integer statusCode = statusLine != null ? proxyResponse.getStatusLine().getStatusCode() : null;
+            Integer statusCode = statusLine != null ? statusLine.getStatusCode() : null;
             if (!this.statusCodeInRange(statusCode)) {
                 throw new HttpAppenderException("Http request failed. Reason: statusCode="
                         + (statusCode != null ? statusCode : "no status code retrieved") + " reasonPhrase="
