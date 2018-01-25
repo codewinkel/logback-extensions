@@ -164,14 +164,17 @@ public abstract class AbstractHttpAppender extends AppenderBase<ILoggingEvent> i
 
     public abstract HttpRequestBase createHttpRequest(ILoggingEvent event) throws HttpAppenderException;
 
+    private boolean statusCodeInRange(Integer statusCode) {
+        return statusCode != null && statusCode >= successStatusCodeMin && statusCode <= successStatusCodeMax;
+    }
+
     public void executeHttpRequest(HttpRequestBase httpRequest) throws HttpAppenderException {
         try {
             HttpResponse proxyResponse = httpClient.execute(httpRequest);
 
             StatusLine statusLine = proxyResponse.getStatusLine();
             Integer statusCode = statusLine != null ? proxyResponse.getStatusLine().getStatusCode() : null;
-            if (statusCode == null || (statusCode.intValue() < successStatusCodeMin
-                    && statusCode.intValue() > successStatusCodeMax)) {
+            if (!this.statusCodeInRange(statusCode)) {
                 throw new HttpAppenderException("Http request failed. Reason: statusCode="
                         + (statusCode != null ? statusCode : "no status code retrieved") + " reasonPhrase="
                         + (statusLine != null ? statusLine.getReasonPhrase() : "no reason retrieved!"));
