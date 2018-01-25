@@ -208,29 +208,27 @@ public abstract class AbstractHttpAppender extends AppenderBase<ILoggingEvent> i
     }
 
     public void addLoggingLevel(String state) {
-        if (state != null && state.length() > 0
-                && LoggingLevel.valueOf(state.toUpperCase()) != null) {
-            LoggingLevel logState = LoggingLevel.valueOf(state.toUpperCase());
-            switch (logState) {
-                case ERROR:
-                    this.error = true;
-                    break;
-                case WARN:
-                    this.warn = true;
-                    break;
-                case INFO:
-                    this.info = true;
-                    break;
-                case DEBUG:
-                    this.debug = true;
-                    break;
-                case TRACE:
-                    this.trace = true;
-                    break;
-            }
-        } else {
+        if (state == null || state.length() <= 0) {
             throw new IllegalArgumentException("Null ,empty or not the right <LoggingLevel> property. States: "
                     + Arrays.toString(LoggingLevel.values()));
+        }
+        LoggingLevel logState = LoggingLevel.valueOf(state.toUpperCase());
+        switch (logState) {
+            case ERROR:
+                this.error = true;
+                break;
+            case WARN:
+                this.warn = true;
+                break;
+            case INFO:
+                this.info = true;
+                break;
+            case DEBUG:
+                this.debug = true;
+                break;
+            case TRACE:
+                this.trace = true;
+                break;
         }
     }
 }
