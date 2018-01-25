@@ -148,8 +148,8 @@ public class HockeyAppCrashAppenderService {
         String throwableClassName = throwableProxy.getClassName();
         String throwableMessage = throwableProxy.getMessage();
         StackTraceElementProxy[] stackTraceElementProxyArray = throwableProxy.getStackTraceElementProxyArray();
-        logger.debug("Parse exception message with"
-                + stackTraceElementProxyArray.length + "elements to create the correct crash log file.");
+        logger.debug("Parse exception message with "
+                + stackTraceElementProxyArray.length + " elements to create the correct crash log file.");
         StringBuffer buffer = new StringBuffer();
         createFirstLine(throwableClassName, throwableMessage, buffer);
 
