@@ -40,16 +40,14 @@ public class HockeyAppCrashAppenderService {
             throws HttpAppenderException {
         logger.debug("Create crash log file body");
         File crashFile = this.createCrashLogFile(throwableProxy, timeStamp);
-        FileBody crashFileBody = new FileBody(crashFile);
-        return crashFileBody;
+        return new FileBody(crashFile);
     }
 
     FileBody createDescriptionFileBody(String formattedMessage, long timeStamp)
             throws HttpAppenderException {
         logger.debug("Create description log file body");
         File crashFile = this.createDescriptionLogFile(formattedMessage, timeStamp);
-        FileBody crashFileBody = new FileBody(crashFile);
-        return crashFileBody;
+        return new FileBody(crashFile);
     }
 
     private File createCrashLogFile(IThrowableProxy throwableProxy, long timestamp)
