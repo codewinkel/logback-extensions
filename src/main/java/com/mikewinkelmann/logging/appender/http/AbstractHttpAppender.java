@@ -46,7 +46,7 @@ public abstract class AbstractHttpAppender extends AppenderBase<ILoggingEvent> i
     private boolean debug = AbstractHttpAppenderConfig.DEFAULT_DEBUG;
     private boolean trace = AbstractHttpAppenderConfig.DEFAULT_TRACE;
     private int successStatusCodeMin = AbstractHttpAppenderConfig.DEFAULT_SUCCESS_CODE_MIN;
-    private int successStatusCodeMax = AbstractHttpAppenderConfig.DEFAULT_SUCCESS_CODE_MIN;
+    private int successStatusCodeMax = AbstractHttpAppenderConfig.DEFAULT_SUCCESS_CODE_MAX;
     private int queueSize = AbstractHttpAppenderConfig.DEFAULT_QUEUE_SIZE;
 
     protected AbstractHttpAppender() {
