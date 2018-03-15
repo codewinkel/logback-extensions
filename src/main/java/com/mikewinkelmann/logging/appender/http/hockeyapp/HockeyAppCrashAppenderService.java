@@ -27,7 +27,7 @@ public class HockeyAppCrashAppenderService {
     private SimpleDateFormat dateFormat = null;
     private String model, manufacturer, os, version, packageName;
 
-    public HockeyAppCrashAppenderService(String model, String manufacturer, String os, String version, String packageName) {
+    HockeyAppCrashAppenderService(String model, String manufacturer, String os, String version, String packageName) {
         this.dateFormat = new SimpleDateFormat(HockeyAppCrashAppenderConfig.DATE_FORMAT);
         this.model = model;
         this.manufacturer = manufacturer;
@@ -40,16 +40,14 @@ public class HockeyAppCrashAppenderService {
             throws HttpAppenderException {
         logger.debug("Create crash log file body");
         File crashFile = this.createCrashLogFile(throwableProxy, timeStamp);
-        FileBody crashFileBody = new FileBody(crashFile);
-        return crashFileBody;
+        return new FileBody(crashFile);
     }
 
     FileBody createDescriptionFileBody(String formattedMessage, long timeStamp)
             throws HttpAppenderException {
         logger.debug("Create description log file body");
         File crashFile = this.createDescriptionLogFile(formattedMessage, timeStamp);
-        FileBody crashFileBody = new FileBody(crashFile);
-        return crashFileBody;
+        return new FileBody(crashFile);
     }
 
     private File createCrashLogFile(IThrowableProxy throwableProxy, long timestamp)
@@ -57,10 +55,9 @@ public class HockeyAppCrashAppenderService {
         FileWriter fileWriter = null;
         BufferedWriter bufferedWriter = null;
         File tmpFile = null;
+        boolean errorOnClose = false;
         try {
             StringBuffer content = new StringBuffer(HockeyAppCrashAppenderConfig.MAXIMUM_CRASH_FILE_SIZE_BYTES);
-            tmpFile = File.createTempFile("exception", ".tmp.log");
-
             content.append("Package: ").append(this.packageName).append("\n");
             content.append("Version: ").append(Strings.nullToEmpty(this.version)).append("\n");
             content.append("OS: ").append(Strings.nullToEmpty(this.os)).append("\n");
@@ -71,28 +68,19 @@ public class HockeyAppCrashAppenderService {
             if (throwableProxy != null)
                 content.append(this.parseStringArrayMessage(throwableProxy)).append("\n");
             content.trimToSize();
-            fileWriter = new FileWriter(tmpFile);
 
+            tmpFile = File.createTempFile("exception", ".tmp.log");
+            fileWriter = new FileWriter(tmpFile);
             bufferedWriter = new BufferedWriter(fileWriter);
             bufferedWriter.write(content.toString());
-
         } catch (Exception e) {
             throw new HttpAppenderException("Error due to create crash log file:", e);
         } finally {
-            if (bufferedWriter != null) {
-                try {
-                    bufferedWriter.flush();
-                    bufferedWriter.close();
-                } catch (IOException e) {
-                    throw new HttpAppenderException("Error due to close crash log buffered file writer:", e);
-                }
-            }
-            if (fileWriter != null)
-                try {
-                    fileWriter.close();
-                } catch (Exception e) {
-                    throw new HttpAppenderException("Error due to close crash log file writer:", e);
-                }
+            errorOnClose = closeBufferedWriter(bufferedWriter)
+                    && closeFileWriter(fileWriter);
+        }
+        if (errorOnClose) {
+            throw new HttpAppenderException("Error closing FileWriter or BufferedWriter");
         }
         logger.debug("Created crash log file content in tempFile: " + tmpFile.getAbsolutePath());
         return tmpFile;
@@ -103,47 +91,65 @@ public class HockeyAppCrashAppenderService {
         FileWriter fileWriter = null;
         BufferedWriter bufferedWriter = null;
         File tmpFile = null;
+        boolean errorOnClose = false;
         try {
             StringBuffer content = new StringBuffer(HockeyAppCrashAppenderConfig.MAXIMUM_DESCRIPTION_FILE_SIZE_BYTES);
-            tmpFile = File.createTempFile("description", ".tmp.log");
 
             content.append("Description: ").append(formattedMessage).append("\n");
             content.append("Date: ").append(dateFormat.format(new Date(timestamp))).append("\n");
             content.append("\n");
             content.trimToSize();
 
+            tmpFile = File.createTempFile("description", ".tmp.log");
             fileWriter = new FileWriter(tmpFile);
             bufferedWriter = new BufferedWriter(fileWriter);
             bufferedWriter.write(content.toString());
-
         } catch (Exception e) {
             throw new HttpAppenderException("Error due to create description log file:", e);
         } finally {
-            if (bufferedWriter != null) {
-                try {
-                    bufferedWriter.flush();
-                    bufferedWriter.close();
-                } catch (IOException e) {
-                    throw new HttpAppenderException("Error due to close description log buffered file writer:", e);
-                }
-            }
-            if (fileWriter != null)
-                try {
-                    fileWriter.close();
-                } catch (Exception e) {
-                    throw new HttpAppenderException("Error due to close description log file writer:", e);
-                }
+            errorOnClose = closeBufferedWriter(bufferedWriter)
+                    && closeFileWriter(fileWriter);
+        }
+        if (errorOnClose) {
+            throw new HttpAppenderException("Error closing FileWriter or BufferedWriter");
         }
         logger.debug("Created crash log file content in tempFile: " + tmpFile.getAbsolutePath());
         return tmpFile;
+    }
+
+    private boolean closeBufferedWriter(BufferedWriter bufferedWriter) {
+        if (bufferedWriter == null) {
+            return true;
+        }
+        boolean closed = true;
+        try {
+            bufferedWriter.flush();
+            bufferedWriter.close();
+        } catch (IOException e) {
+            closed = false;
+        }
+        return closed;
+    }
+
+    private boolean closeFileWriter(FileWriter fileWriter) {
+        if (fileWriter == null) {
+            return true;
+        }
+        boolean closed = true;
+        try {
+            fileWriter.close();
+        } catch (IOException e) {
+            closed = false;
+        }
+        return closed;
     }
 
     private String parseStringArrayMessage(IThrowableProxy throwableProxy) {
         String throwableClassName = throwableProxy.getClassName();
         String throwableMessage = throwableProxy.getMessage();
         StackTraceElementProxy[] stackTraceElementProxyArray = throwableProxy.getStackTraceElementProxyArray();
-        logger.debug("Parse exception message with"
-                + stackTraceElementProxyArray.length + "elements to create the correct crash log file.");
+        logger.debug("Parse exception message with "
+                + stackTraceElementProxyArray.length + " elements to create the correct crash log file.");
         StringBuffer buffer = new StringBuffer();
         createFirstLine(throwableClassName, throwableMessage, buffer);
 

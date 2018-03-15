@@ -46,7 +46,7 @@ public abstract class AbstractHttpAppender extends AppenderBase<ILoggingEvent> i
     private boolean debug = AbstractHttpAppenderConfig.DEFAULT_DEBUG;
     private boolean trace = AbstractHttpAppenderConfig.DEFAULT_TRACE;
     private int successStatusCodeMin = AbstractHttpAppenderConfig.DEFAULT_SUCCESS_CODE_MIN;
-    private int successStatusCodeMax = AbstractHttpAppenderConfig.DEFAULT_SUCCESS_CODE_MIN;
+    private int successStatusCodeMax = AbstractHttpAppenderConfig.DEFAULT_SUCCESS_CODE_MAX;
     private int queueSize = AbstractHttpAppenderConfig.DEFAULT_QUEUE_SIZE;
 
     protected AbstractHttpAppender() {
@@ -81,11 +81,9 @@ public abstract class AbstractHttpAppender extends AppenderBase<ILoggingEvent> i
         queue.offer(event);
     }
 
-    @Override
     public final void run() {
         try {
             while (!Thread.currentThread().isInterrupted()) {
-
                 if (this.httpClient == null)
                     break;
 
@@ -164,14 +162,17 @@ public abstract class AbstractHttpAppender extends AppenderBase<ILoggingEvent> i
 
     public abstract HttpRequestBase createHttpRequest(ILoggingEvent event) throws HttpAppenderException;
 
+    private boolean statusCodeInRange(Integer statusCode) {
+        return statusCode != null && statusCode >= successStatusCodeMin && statusCode <= successStatusCodeMax;
+    }
+
     public void executeHttpRequest(HttpRequestBase httpRequest) throws HttpAppenderException {
         try {
             HttpResponse proxyResponse = httpClient.execute(httpRequest);
 
             StatusLine statusLine = proxyResponse.getStatusLine();
-            Integer statusCode = statusLine != null ? proxyResponse.getStatusLine().getStatusCode() : null;
-            if (statusCode == null || (statusCode.intValue() < successStatusCodeMin
-                    && statusCode.intValue() > successStatusCodeMax)) {
+            Integer statusCode = statusLine != null ? statusLine.getStatusCode() : null;
+            if (!this.statusCodeInRange(statusCode)) {
                 throw new HttpAppenderException("Http request failed. Reason: statusCode="
                         + (statusCode != null ? statusCode : "no status code retrieved") + " reasonPhrase="
                         + (statusLine != null ? statusLine.getReasonPhrase() : "no reason retrieved!"));
@@ -205,29 +206,27 @@ public abstract class AbstractHttpAppender extends AppenderBase<ILoggingEvent> i
     }
 
     public void addLoggingLevel(String state) {
-        if (state != null && state.length() > 0
-                && LoggingLevel.valueOf(state.toUpperCase()) != null) {
-            LoggingLevel logState = LoggingLevel.valueOf(state.toUpperCase());
-            switch (logState) {
-                case ERROR:
-                    this.error = true;
-                    break;
-                case WARN:
-                    this.warn = true;
-                    break;
-                case INFO:
-                    this.info = true;
-                    break;
-                case DEBUG:
-                    this.debug = true;
-                    break;
-                case TRACE:
-                    this.trace = true;
-                    break;
-            }
-        } else {
-            throw new IllegalArgumentException("Null ,empty or not the right <LoggingLevel> property. States: "
+        if (state == null || state.length() <= 0) {
+            throw new IllegalArgumentException("null, empty or not the right <LoggingLevel> property. States: "
                     + Arrays.toString(LoggingLevel.values()));
+        }
+        LoggingLevel logState = LoggingLevel.valueOf(state.toUpperCase());
+        switch (logState) {
+            case ERROR:
+                this.error = true;
+                break;
+            case WARN:
+                this.warn = true;
+                break;
+            case INFO:
+                this.info = true;
+                break;
+            case DEBUG:
+                this.debug = true;
+                break;
+            case TRACE:
+                this.trace = true;
+                break;
         }
     }
 }
